@@ -6,22 +6,24 @@
 // Seneca()
 //   .use("./trade.js", {service: 'service1', ts: ts})
 //   .listen({port: '9001', pin: 'service:service1'})
+const timesync = require("timesync");
 
-var Seneca = require('seneca')
-var express = require('express')
-var timesyncServer = require('timesync/server');
+const Seneca = require('seneca');
+// const ts = require("./time.js").init();
 
-var config = {
-  adapter: require('seneca-web-adapter-express'),
-  context: express()
-}
-
-var seneca = Seneca()
-  .use('seneca-web', config)
-  .ready(() => {
-    var server = seneca.export('web/context')()
-    server.use('/timesync', timesyncServer.requestHandler)
-    server.listen('4000', () => {
-      console.log('server started on: 4000')
-    })
+Seneca()
+  .use("./trade.js", {service: 'service1'})
+  .add('method:timesync', (msg,reply) => {
+    console.log(ts.now())
+    reply({sync: "success"});
   })
+  .listen({port: '9001', pin: 'service:service1'})
+
+let ts = timesync.create({
+  peers: ["http://localhost:9002/act","http://localhost:9003/act"], 
+  interval: 10000
+});
+
+setInterval(function(){
+  console.log("Time: " + new Date(ts.now()));
+}, 10000)
