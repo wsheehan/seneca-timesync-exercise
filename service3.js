@@ -6,7 +6,10 @@ const timesync = require("timesync");
 
 Seneca()
   .use("./trade.js", {service: 'service3'})
-  .use("./sync.js", {})
+  .add('method:timesync', (msg,reply) => {
+    console.log(ts.now())
+    reply({sync: "success"});
+  })
   .listen({port: '9003', pin: 'service:service3'})
 
 let ts = timesync.create({
